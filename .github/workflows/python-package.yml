@@ -6,7 +6,6 @@ name: BUPT book info
 on:
   schedule:
     - cron: '0 16 * * *' # 每天16:00 UTC执行
-  workflow_dispatch
 
 jobs:
   build:
