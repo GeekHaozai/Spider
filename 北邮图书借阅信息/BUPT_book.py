@@ -131,7 +131,7 @@ def send_mail():
                 panduan_guoqi = 0
         else:
             guoqi = "未过期"
-            if (calcu(book['mydate']) <= 0):
+            if (calcu(book['mydate']) <= 1):
                 renew(book["libraryId"],book["bookBarcode"],book["departmentId"],vpn_ticket)
             if (calcu(book['mydate']) < day_left):
                 day_left = calcu(book['mydate'])
@@ -141,7 +141,7 @@ def send_mail():
     print("[INFO]:最近需要还书日期||",day_left)
     email_title = f"主人，你还有{day_left}天就要还书啦~"
     if (day_left == 1):
-        email_title = f"主人，你还有1天就要还书啦~,如果今天不能按时归还，明天将自动为您续期~"
+        email_title = f"主人，你还有1天就要还书啦~,如果今天不能按时归还，将自动为您续期哦~"
     elif (day_left == 0):
         email_title = f"主人，不能自动续借啦~，快去还书吧~"
     send_email.send_mail(email_title, "\n".join(book_info).strip())
