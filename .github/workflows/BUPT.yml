@@ -5,7 +5,7 @@ name: BUPT book info
 
 on:
   schedule:
-    - cron: '0 16 * * *' # 每天16:00 UTC执行
+    - cron: '0 0 * * *' # 每天北京时间8:00 执行
 
 jobs:
   build:
@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.11"]
 
     steps:
     - uses: actions/checkout@v3
