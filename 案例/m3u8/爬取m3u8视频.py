@@ -43,7 +43,7 @@ async def download_ts(ts_url, index, session):
 
 def join_ts():
     total = len(os.listdir("爬取的ts片段"))
-    with open("合并的视频\合并后的ts.mp4", "wb") as f:
+    with open("合并的视频/合并后的ts.mp4", "wb") as f:
         for i in range(total):
             with open(f"爬取的ts片段\\{i + 1}.ts", "rb") as f2:
                 f.write(f2.read())
@@ -68,7 +68,11 @@ if __name__ == '__main__':
     print("[INFO]:取得m3u8视频地址成功|", master_m3u8_url)
     text = requests.get(master_m3u8_url).text
     print(text)
-    index_m3u8 = re.search("index-f2-v1-a1.m3u8.*?\n", text).group(0).strip()
-    index_m3u8_url = "https://ev-h.phncdn.com/hls/videos/202402/18/448335911/,1080P_4000K,720P_4000K,480P_2000K,240P_1000K,_448335911.mp4.urlset/" + index_m3u8
-    print("[INFO]:取得m3u8索引地址成功|", index_m3u8_url)
-    asyncio.run(download_ts_all(index_m3u8_url))
+    # index_m3u8 = re.search("index-f2-v1-a1.m3u8.*?\n", text).group(0).strip()
+    # index_m3u8_url = "https://ev-h.phncdn.com/hls/videos/202402/18/448335911/,1080P_4000K,720P_4000K,480P_2000K,240P_1000K,_448335911.mp4.urlset/" + index_m3u8
+    # print("[INFO]:取得m3u8索引地址成功|", index_m3u8_url)
+    # asyncio.run(download_ts_all(index_m3u8_url))
+    import subprocess
+    from functools import partial
+    subprocess.Popen = partial(subprocess.Popen, encoding='utf-8')
+    os.system(f"N_m3u8DL-CLI_v3.0.2.exe {master_m3u8_url}")
