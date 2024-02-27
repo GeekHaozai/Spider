@@ -26,15 +26,15 @@ async def download_ts_all(m3u8_index_url):
 
 
 async def download_ts(ts_url, index, session):
-    base_url = "https://ev-h.phncdn.com/hls/videos/202402/18/448335911/,1080P_4000K,720P_4000K,480P_2000K,240P_1000K,_448335911.mp4.urlset/"
+    base_url = ""
     url = base_url + ts_url
     url = url.replace("ev","cv")
     print(f"[INFO]开始下载: {url}")
     async with session.get(url,headers ={
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "authority": "ev-h.phncdn.com",
-        "Origin":"https://cn.pornhub.com",
-        "Referer":"https://cn.pornhub.com/"
+        "authority": "",
+        "Origin":"",
+        "Referer":""
     }) as response:
         async with aiofiles.open(f"爬取的ts片段/{index}.ts", 'wb') as f:
             await f.write(await response.read())
@@ -55,7 +55,7 @@ def join_ts():
 
 if __name__ == '__main__':
     while True:
-        html = requests.get("https://cn.pornhub.com/view_video.php?viewkey=65d23d9e3ed85&t=193").text
+        html = requests.get("").text
         # print(html)
         master_m3u8 = re.findall("\"videoUrl\":\"(.*?)\"",html)
         print("[INFO]:获取视频地址列表成功|", master_m3u8)
@@ -63,13 +63,13 @@ if __name__ == '__main__':
         if "validfrom=" not in master_m3u8:
             print("[INFO]:取得视频地址成功|", master_m3u8)
             break
-    match = re.search("/1080P_4000K_(\d+)\.mp4",master_m3u8).group(1)
-    master_m3u8_url = re.sub("/1080P_4000K_\d+\.mp4",f"/,1080P_4000K,720P_4000K,480P_2000K,240P_1000K,_{match}.mp4.urlset",master_m3u8)
+    match = re.search("",master_m3u8).group(1)
+    master_m3u8_url = re.sub("",master_m3u8)
     print("[INFO]:取得m3u8视频地址成功|", master_m3u8_url)
     text = requests.get(master_m3u8_url).text
     print(text)
     # index_m3u8 = re.search("index-f2-v1-a1.m3u8.*?\n", text).group(0).strip()
-    # index_m3u8_url = "https://ev-h.phncdn.com/hls/videos/202402/18/448335911/,1080P_4000K,720P_4000K,480P_2000K,240P_1000K,_448335911.mp4.urlset/" + index_m3u8
+    # index_m3u8_url = "" + index_m3u8
     # print("[INFO]:取得m3u8索引地址成功|", index_m3u8_url)
     # asyncio.run(download_ts_all(index_m3u8_url))
     import subprocess
