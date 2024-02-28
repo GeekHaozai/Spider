@@ -1,9 +1,12 @@
 import json
-import prettytable
+import time
+
 import httpx
+import csv
 from loguru import logger
 import requests
 import re
+
 
 class LoginHelper:
     def __init__(self, session):
@@ -142,21 +145,19 @@ class InfoGetter:
 
     # 还得有些步骤才能进入
     def get_in_xuanke(self):
-        data = {"name":"","type":"button","value":" 进入选课 "}
+        data = {"name": "", "type": "button", "value": " 进入选课 "}
         headers = {
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
             'Content-Type': 'application/json'
         }
-        res = self.session.post("https://webvpn.bupt.edu.cn/wengine-vpn/input",data=json.dumps(data),headers=headers)
+        res = self.session.post("https://webvpn.bupt.edu.cn/wengine-vpn/input", data=json.dumps(data), headers=headers)
         # logger.info("进入选课页面结果:" + str(res.status_code)+"\n"+res.text)
-        res = self.session.get("https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxk/xsxk_index?jx0502zbid=FE81621AE8DC45C18202DB2101EFB209")
+        res = self.session.get(
+            "https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxk/xsxk_index?jx0502zbid=FE81621AE8DC45C18202DB2101EFB209")
         if "选课结果查看及退选" in res.text:
             logger.info("进入选课页面成功")
 
-
-    # 选修选课
-    def get_xuanxiu(self):
-        start = 0
+    def get_info(self, start, url, category):
         data = {
             'sEcho': '1',
             'iColumns': '11',
@@ -175,14 +176,11 @@ class InfoGetter:
             'mDataProp_9': 'ctsm',
             'mDataProp_10': 'czOper'
         }
-
-        response = session.post(
-            'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkkc/xsxkXxxk',data=data)
-        logger.info("选修选课信息:" + str(response.json()))
-        table = prettytable.PrettyTable(
-            ['课程编号', '课程名称', '分组名', '合班名称', '学分', '上课老师', '上课时间', '上课地点', '上课校区',
-             '时间冲突'])
-        for ke in response.json()['aaData']:
+        response = self.session.post(url, data=data)
+        result = re.sub(r"\n", "", response.text)
+        result = json.loads(re.sub("<script>.*</script>", "", result))
+        logger.info(f"{category}选课信息:" + str(result))
+        for ke in result['aaData']:
             # 原谅我为了记忆使用中文变量名
             课程编号 = ke['kch']
             课程名称 = ke['kcmc']
@@ -194,59 +192,97 @@ class InfoGetter:
             上课地点 = ke['skdd']
             上课校区 = ke['xqmc']
             时间冲突 = ke['ctsm']
-            table.add_row([课程编号, 课程名称, 分组名, 合班名称, 学分, 上课老师, 上课时间, 上课地点, 上课校区, 时间冲突])
-        total = max(response.json()['iTotalRecords'], response.json()['iTotalDisplayRecords'])
-        start += 15
-        while start<total:
-            data = {
-                'sEcho': '1',
-                'iColumns': '11',
-                'sColumns': '',
-                'iDisplayStart': str(start),
-                'iDisplayLength': '15',
-                'mDataProp_0': 'kch',
-                'mDataProp_1': 'kcmc',
-                'mDataProp_2': 'fzmc',
-                'mDataProp_3': 'ktmc',
-                'mDataProp_4': 'xf',
-                'mDataProp_5': 'skls',
-                'mDataProp_6': 'sksj',
-                'mDataProp_7': 'skdd',
-                'mDataProp_8': 'xqmc',
-                'mDataProp_9': 'ctsm',
-                'mDataProp_10': 'czOper'
-            }
-            response = session.post(
-                'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkkc/xsxkXxxk',
-                data=data)
-            result = re.sub(r"\n", "", response.text)
-            result = re.sub("<script>.*</script>", "", result).replace(" ","").replace("<br>","\n")
-            json_res = json.loads(result)
-            logger.info("选修选课信息:" + str(json_res))
-            table = prettytable.PrettyTable(
-                ['课程编号', '课程名称', '分组名', '合班名称', '学分', '上课老师', '上课时间', '上课地点', '上课校区',
-                 '时间冲突'])
-            for ke in json_res['aaData']:
-                # 原谅我为了记忆使用中文变量名
-                课程编号 = ke['kch']
-                课程名称 = ke['kcmc']
-                分组名 = ke['fzmc']
-                合班名称 = ke['ktmc']
-                学分 = ke['xf']
-                上课老师 = ke['skls']
-                上课时间 = ke['sksj']
-                上课地点 = ke['skdd']
-                上课校区 = ke['xqmc']
-                时间冲突 = ke['ctsm']
-                table.add_row(
-                    [课程编号, 课程名称, 分组名, 合班名称, 学分, 上课老师, 上课时间, 上课地点, 上课校区, 时间冲突])
-            start += 15
-        table.align = "c"
-        print(table)
+            kcid = ke["jx02id"]
+            jxid = ke["jx0404id"]
+            logger.info(
+                [课程编号, 课程名称, 分组名, 合班名称, 学分, 上课老师, 上课时间, 上课地点, 上课校区, 时间冲突, kcid,
+                 jxid])
+            with open(f"{category}选课信息.csv", "a", encoding="utf-8", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(
+                    [课程编号, 课程名称, 分组名, 合班名称, 学分, 上课老师, 上课时间, 上课地点, 上课校区, 时间冲突, kcid,
+                     jxid])
+        total = max(result['iTotalRecords'], result['iTotalDisplayRecords'])
+        if start + 15 < total:
+            self.get_info(start+15, url, category)
+
+    # 选修选课信息
+    def get_xuanxiu(self):
+        start = 0
+        with open("选修选课信息.csv", "w", encoding="utf-8", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                ["课程编号", "课程名称", "分组名", "合班名称", "学分", "上课老师", "上课时间", "上课地点", "上课校区",
+                 "时间冲突", "kcid", "jxid"])
+        data = {
+            'sEcho': '1',
+            'iColumns': '11',
+            'sColumns': '',
+            'iDisplayStart': str(start),
+            'iDisplayLength': '15',
+            'mDataProp_0': 'kch',
+            'mDataProp_1': 'kcmc',
+            'mDataProp_2': 'fzmc',
+            'mDataProp_3': 'ktmc',
+            'mDataProp_4': 'xf',
+            'mDataProp_5': 'skls',
+            'mDataProp_6': 'sksj',
+            'mDataProp_7': 'skdd',
+            'mDataProp_8': 'xqmc',
+            'mDataProp_9': 'ctsm',
+            'mDataProp_10': 'czOper'
+        }
+        url = 'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkkc/xsxkXxxk'
+        self.get_info(start, url=url, category="选修")
+        logger.success("选修选课信息已输出为csv文件")
+
+    # 公选课选课信息
+    def get_public_course(self):
+        start = 0
+        with open("公选课选课信息.csv", "w", encoding="utf-8", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                ["课程编号", "课程名称", "分组名", "合班名称", "学分", "上课老师", "上课时间", "上课地点", "上课校区",
+                 "时间冲突", "kcid", "jxid"])
+        url = 'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkkc/xsxkGgxxkxk'
+        self.get_info(start, url=url, category="公选课")
+        logger.success("公选课选课信息已输出为csv文件")
+
 
 class ChooseCourseHelper:
     def __init__(self, session):
         self.session = session
+
+    def choose_course(self, kcid: str, jxid: str):
+        params = {
+            'vpn-12-o2-jwgl.bupt.edu.cn': '',
+            'kcid': kcid,
+            'cfbs': "null",
+            'jx0404id': jxid,
+            'xkzy': '',
+            'trjf': '',
+            '_': str(int(time.time() * 1000))
+        }
+        response = self.session.get(
+            'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkkc/xxxkOper',
+            params=params)
+        if "错误" in response.text:
+            response = self.session.get(
+            'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkkc/ggxxkxkOper',
+            params=params)
+        logger.info("选课结果:" + response.json()["message"])
+
+    def unchoose_course(self, jxid: str):
+        params = {
+            'vpn-12-o2-jwgl.bupt.edu.cn': '',
+            'jx0404id': jxid,
+            'tkyy': '',
+            '_': str(int(time.time() * 1000)),
+        }
+        response = self.session.get(
+            'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkjg/xstkOper',
+            params=params)
+        logger.info("退课结果:" + response.json()["success"])
 
 
 if __name__ == '__main__':
@@ -258,4 +294,22 @@ if __name__ == '__main__':
     lh.vpn_login(2022212288, "WenHao0425")
     lh.edu_login("2022212288", "20040425")
     ig.get_in_xuanke()
-    ig.get_xuanxiu()
+    # ig.get_xuanxiu()
+    # ig.get_public_course()
+    while True:
+        try:
+            kcid = input("请输入需要选课的kcid:")
+            if kcid == ":q":
+                break
+            jxid = input("请输入需要选课的jxid:")
+            if jxid == ":q":
+                break
+            cc.choose_course(kcid, jxid)
+        except:
+            kcid = input("请输入需要选课的kcid:")
+            if kcid == ":q":
+                break
+            jxid = input("请输入需要选课的jxid:")
+            if jxid == ":q":
+                break
+            cc.choose_course(kcid, jxid)
