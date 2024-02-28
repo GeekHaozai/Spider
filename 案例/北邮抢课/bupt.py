@@ -1,6 +1,6 @@
 import json
 import time
-
+import ddddocr
 import httpx
 import csv
 from loguru import logger
@@ -136,6 +136,39 @@ class LoginHelper:
         result = "成功" if "成绩证明" in res.text else "失败"
         logger.info("教育管理系统登录结果:" + str(result) + str(res.status_code))
         logger.info("cookie状态:" + str(self.session.cookies))
+
+    def menghu_login(self, username, password):
+        megnhu_exe_url = "https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login"
+        # 获取execution
+        r = self.session.get(megnhu_exe_url, headers={"Referer": "https://webvpn.bupt.edu.cn/"})
+        execution = re.findall("\"execution\" value=\"(.*?)\"", r.text)[0].strip()
+        logger.info("成功获取execution:||"+execution)
+        pic = self.session.get("https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/captcha?vpn-1&captchaId=3682469353")
+        ocr = ddddocr.DdddOcr()
+        captcha = ocr.classification(pic.content)
+        logger.success("验证码识别结果:" + captcha)
+        res = self.session.post('https://webvpn.bupt.edu.cn/wengine-vpn/input',data='{"name":"","type":"text","value":"'+captcha+'"}',)
+        logger.debug("input请求结果:" +res.text)
+        menghu_login_url = "https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login"
+        data = {
+            'username': username,
+            'password': password,
+            "captcha": captcha,
+            'submit': '登录',
+            'type': 'username_password',
+            'execution': execution,
+            '_eventId': 'submit'
+        }
+        response = self.session.post(menghu_login_url, data=data)
+        if "移动校园" or "Locked" in response.text:
+            logger.error("登录失败")
+            print(response.text)
+            return True
+        else:
+            logger.success("门户登录成功")
+            print(response.text)
+            # self.session.p
+            return False
 
 
 # 进入选课页面获取信息
