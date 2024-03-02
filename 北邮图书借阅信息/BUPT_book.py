@@ -12,10 +12,7 @@ session.headers = {
 # 首先登录vpn
 lh = LoginHelper(session)
 lh.vpn_login(2022212288, "WenHao0425")
-login_try_num=1
-while lh.menghu_login(username="2022212288", password="iloveprogram0!"):
-    logger.info(f"第{login_try_num}次尝试登录")
-    login_try_num += 1
+lh.menghu_login(username="2022212288", password="WenHao0425*.*")
 # 然后登录信息门户
 
 
