@@ -76,14 +76,7 @@ def get_book_info():
     # print(books.text)
     return books.json()
 
-def calcu(back_time:str):
-    today = str(datetime.date.today())
-    back_time = back_time.replace("/","-")
-    date_format = '%Y-%m-%d'
-    today = datetime.datetime.strptime(today, date_format)
-    back_time = datetime.datetime.strptime(back_time, date_format)
-    day_left = (back_time - today).days
-    return day_left
+
 
 def renew(libraryId,bookBarcode,departmentId,vpn_ticket):
     xujie_url = "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b//xujie.json?vpn-12-o1-opac.bupt.edu.cn:8080"

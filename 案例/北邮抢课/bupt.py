@@ -1,20 +1,24 @@
 import json
 import time
 import ddddocr
-import httpx
 import csv
 from loguru import logger
 import requests
 import re
 
+class BuptWeb:
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+        }
 
 class LoginHelper:
     def __init__(self, session):
         self.session = session
-        self.headers = {
+        self.session.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
         }
-        self.session.headers = self.headers
 
     def vpn_login(self, username, password):
         url = "https://webvpn.bupt.edu.cn/do-login"
@@ -162,18 +166,19 @@ class LoginHelper:
             'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Microsoft Edge";v="122"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"',
+
         }
 
         response = self.session.get(
             menghu_url,
             headers=headers, cookies=cookies)
-        print(response.text)
+        # print(response.text)
         execution = re.findall("\"execution\" value=\"(.*?)\"", response.text)[0].strip()
         logger.info("成功获取execution:||" + execution)
         captcha_id = re.findall(r"id: '(\d+)'",response.text,re.DOTALL)[0]  # 4707540463
         print(captcha_id)
         if captcha_id:
-            logger.info("获取captchaId:" + captcha_id[0])
+            logger.info("获取captchaId:" + captcha_id)
             pic = self.session.get(
                 f"https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/captcha?vpn-1&captchaId={captcha_id}&r=45738")
             ocr = ddddocr.DdddOcr()
@@ -185,6 +190,7 @@ class LoginHelper:
         else:
             captcha = None
         menghu_login_url = "https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login"
+        tushu_login_url = "https://webvpn.bupt.edu.cn/http/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login"
         data = {
             'username': username,
             'password': password,
@@ -219,6 +225,33 @@ class LoginHelper:
             'refresh': '1',
         }
         response = self.session.post(menghu_login_url, data=data,headers=headers,cookies=cookies)
+        ress = self.session.post(tushu_login_url,data={
+            'username': username,
+            'password': password,
+            "captcha": captcha,
+            'submit': '登录',
+            'type': 'username_password',
+            'execution': execution,
+            '_eventId': 'submit'
+        },headers={
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+            'Cache-Control': 'max-age=0',
+            'Connection': 'keep-alive',
+            # 'Content-Type': 'application/json' 就是这里有问题
+            'Origin': 'https://webvpn.bupt.edu.cn',
+            'Referer': "https://webvpn.bupt.edu.cn/http/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login?service=http%3A%2F%2Fopac.bupt.edu.cn%3A8080%2Fbeiyou.html",
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-User': '?1',
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0',
+            'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Microsoft Edge";v="122"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+        },cookies=cookies)
+        print(ress.text)
         print(response.headers)
         print(response.status_code)
         if "移动校园" in response.text:
@@ -227,79 +260,19 @@ class LoginHelper:
             # return attempt_login(response.text)
         else:
             logger.success("门户登录成功")
-            print(response.text)
+            # print(response.text)
             # self.session.p
             return True
 
-        # def attempt_login(login_html):
-        #     self.session.get(
-        #         "https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/cas/login-normal.html")
-        #     execution = re.findall("\"execution\" value=\"(.*?)\"", login_html)[0].strip()
-        #     logger.info("成功获取execution:||" + execution)
-        #     captcha_id = re.findall(r"id: '(\d+)'",login_html,re.DOTALL)  # 4707540463
-        #     print(captcha_id)
-        #     if captcha_id:
-        #         logger.info("获取captchaId:" + captcha_id[0])
-        #         pic = self.session.get(
-        #             f"https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/captcha?vpn-1&captchaId={captcha_id}&r=45738")
-        #         ocr = ddddocr.DdddOcr()
-        #         captcha = ocr.classification(pic.content)
-        #         logger.success("验证码识别结果:" + captcha)
-        #         res = self.session.post('https://webvpn.bupt.edu.cn/wengine-vpn/input',
-        #                                 data='{"name":"","type":"text","value":"' + captcha + '"}', )
-        #         logger.debug("input请求结果:" + res.text)
-        #     else:
-        #         captcha = None
-        #     menghu_login_url = "https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login"
-        #     data = {
-        #         'username': username,
-        #         'password': password,
-        #         "captcha": captcha,
-        #         'submit': '登录',
-        #         'type': 'username_password',
-        #         'execution': execution,
-        #         '_eventId': 'submit'
-        #     }
-        #     headers = {
-        #         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        #         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-        #         'Cache-Control': 'max-age=0',
-        #         'Connection': 'keep-alive',
-        #         'Content-Type': 'application/x-www-form-urlencoded',
-        #         'Origin': 'https://webvpn.bupt.edu.cn',
-        #         'Referer': 'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login?service=http%3A%2F%2Fmy.bupt.edu.cn%2Fsystem%2Fresource%2Fcode%2Fauth%2Fclogin.jsp%3Fowner%3D1664271694',
-        #         'Sec-Fetch-Dest': 'document',
-        #         'Sec-Fetch-Mode': 'navigate',
-        #         'Sec-Fetch-Site': 'same-origin',
-        #         'Sec-Fetch-User': '?1',
-        #         'Upgrade-Insecure-Requests': '1',
-        #         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0',
-        #         'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Microsoft Edge";v="122"',
-        #         'sec-ch-ua-mobile': '?0',
-        #         'sec-ch-ua-platform': '"Windows"',
-        #     }
-        #     cookies = {
-        #         'show_vpn': '0',
-        #         'heartbeat': '1',
-        #         'show_faq': '0',
-        #         'refresh': '1',
-        #     }
-        #     response = self.session.post(menghu_login_url, data=data,headers=headers,cookies=cookies)
-        #     print(response.request._cookies)
-        #     if "移动校园" in response.text:
-        #         logger.error("登录失败")
-        #         # print(response.text)
-        #         # return attempt_login(response.text)
-        #     else:
-        #         logger.success("门户登录成功")
-        #         print(response.text)
-        #         # self.session.p
-        #         return True
-        #
-        # captcha_html = self.session.get("http://my.bupt.edu.cn",headers = {'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6'}).text
-        # print(captcha_html)
-        # return attempt_login(captcha_html)
-
+    def get_book_info(self):
+        self.session.get(
+            "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b/beiyou.html")
+        # 按下button
+        book_url = "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b//reader-borrowinfo.json?vpn-12-o1-opac.bupt.edu.cn:8080"
+        books = self.session.post(book_url, headers={
+            "Referer": "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b/reader-borrowinfo.html"})
+        print(books.text)
+        return books.json()
 
 
 # 进入选课页面获取信息
