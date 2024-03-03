@@ -14,7 +14,8 @@ class LoginHelper:
     def __init__(self, session):
         self.session = session
         self.session.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/58.0.3029.110 Safari/537.3"
         }
 
     def vpn_login(self, username, password):
@@ -183,8 +184,10 @@ class LoginHelper:
             logger.debug("input请求结果:" + res.text)
         else:
             captcha = None
-        menghu_login_url = "https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login"
-        tushu_login_url = "https://webvpn.bupt.edu.cn/http/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login"
+        menghu_login_url = ("https://webvpn.bupt.edu.cn/https"
+                            "/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login")
+        tushu_login_url = ("https://webvpn.bupt.edu.cn/http"
+                           "/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login")
         data = {
             'username': username,
             'password': password,
@@ -228,19 +231,23 @@ class LoginHelper:
             'execution': execution,
             '_eventId': 'submit'
         }, headers={
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,'
+                      '*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
             'Cache-Control': 'max-age=0',
             'Connection': 'keep-alive',
             # 'Content-Type': 'application/json' 就是这里有问题
             'Origin': 'https://webvpn.bupt.edu.cn',
-            'Referer': "https://webvpn.bupt.edu.cn/http/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login?service=http%3A%2F%2Fopac.bupt.edu.cn%3A8080%2Fbeiyou.html",
+            'Referer': "https://webvpn.bupt.edu.cn/http"
+                       "/77726476706e69737468656265737421f1e2559469327d406a468ca88d1b203b/authserver/login?service"
+                       "=http%3A%2F%2Fopac.bupt.edu.cn%3A8080%2Fbeiyou.html",
             'Sec-Fetch-Dest': 'document',
             'Sec-Fetch-Mode': 'navigate',
             'Sec-Fetch-Site': 'same-origin',
             'Sec-Fetch-User': '?1',
             'Upgrade-Insecure-Requests': '1',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0',
             'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Microsoft Edge";v="122"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"',
@@ -265,16 +272,22 @@ class LibraryInfoHandler:
 
     def get_book_info(self):
         self.session.get(
-            "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b/beiyou.html")
+            "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b"
+            "/beiyou.html")
         # 按下button
-        book_url = "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b//reader-borrowinfo.json?vpn-12-o1-opac.bupt.edu.cn:8080"
+        book_url = ("https://webvpn.bupt.edu.cn/http-8080"
+                    "/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b//reader-borrowinfo.json?vpn-12"
+                    "-o1-opac.bupt.edu.cn:8080")
         books = self.session.post(book_url, headers={
-            "Referer": "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b/reader-borrowinfo.html"})
+            "Referer": "https://webvpn.bupt.edu.cn/http-8080"
+                       "/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b/reader-borrowinfo.html"})
         # print(books.text)
         return books.json()
 
     def renew(self, libraryId, bookBarcode, departmentId):
-        xujie_url = "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b//xujie.json?vpn-12-o1-opac.bupt.edu.cn:8080"
+        xujie_url = ("https://webvpn.bupt.edu.cn/http-8080"
+                     "/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b//xujie.json?vpn-12-o1-opac"
+                     ".bupt.edu.cn:8080")
         headers = {
             'Accept': '*/*',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
@@ -318,27 +331,28 @@ class LibraryInfoHandler:
         panduan_guoqi = 1
         for book in books:
             print(book['title'], "||", book['mydate'], "||", book['guoqi'])
-            if (book['guoqi'] == 1):
+            if book['guoqi'] == 1:
                 guoqi = "已过期"
-                if (panduan_guoqi):
+                if panduan_guoqi:
                     book_info.append("\n以下是已经过期的书籍，主人请尽快归还哦")
                     panduan_guoqi = 0
             else:
                 guoqi = "未过期"
-                if (LibraryInfoHandler.calcu(book['mydate']) <= 1):
+                if LibraryInfoHandler.calcu(book['mydate']) <= 1:
                     self.renew(book["libraryId"], book["bookBarcode"], book["departmentId"])
-                if (LibraryInfoHandler.calcu(book['mydate']) < day_left):
+                if LibraryInfoHandler.calcu(book['mydate']) < day_left:
                     day_left = LibraryInfoHandler.calcu(book['mydate'])
 
             book_info.append(f"{count}. {book['title']}\n是否已经过期:{guoqi}\n还书时间:{book['mydate']}")
             count += 1
         print("[INFO]:最近需要还书日期||", day_left)
         email_title = f"主人，你还有{day_left}天就要还书啦~"
-        if (day_left == 1):
+        if day_left == 1:
             email_title = f"主人，你还有1天就要还书啦~,如果今天不能按时归还，将自动为您续期哦~"
-        elif (day_left == 0):
+        elif day_left == 0:
             email_title = f"主人，不能自动续借啦~，快去还书吧~"
         send_email.send_mail(email_title, "\n".join(book_info).strip())
+        logger.success("邮件已成功发出")
 
 
 # 进入选课页面获取信息
@@ -356,7 +370,8 @@ class CourseInfoGetter:
         res = self.session.post("https://webvpn.bupt.edu.cn/wengine-vpn/input", data=json.dumps(data), headers=headers)
         # logger.info("进入选课页面结果:" + str(res.status_code)+"\n"+res.text)
         res = self.session.get(
-            "https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxk/xsxk_index?jx0502zbid=FE81621AE8DC45C18202DB2101EFB209")
+            "https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd"
+            "/xsxk/xsxk_index?jx0502zbid=FE81621AE8DC45C18202DB2101EFB209")
         if "选课结果查看及退选" in res.text:
             logger.info("进入选课页面成功")
 
@@ -435,7 +450,8 @@ class CourseInfoGetter:
             'mDataProp_9': 'ctsm',
             'mDataProp_10': 'czOper'
         }
-        url = 'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkkc/xsxkXxxk'
+        url = ('https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b'
+               '/jsxsd/xsxkkc/xsxkXxxk')
         self.get_info(start, url=url, category="选修")
         logger.success("选修选课信息已输出为csv文件")
 
@@ -447,7 +463,8 @@ class CourseInfoGetter:
             writer.writerow(
                 ["课程编号", "课程名称", "分组名", "合班名称", "学分", "上课老师", "上课时间", "上课地点", "上课校区",
                  "时间冲突", "kcid", "jxid"])
-        url = 'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkkc/xsxkGgxxkxk'
+        url = ('https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b'
+               '/jsxsd/xsxkkc/xsxkGgxxkxk')
         self.get_info(start, url=url, category="公选课")
         logger.success("公选课选课信息已输出为csv文件")
 
@@ -467,11 +484,13 @@ class ChooseCourseHelper:
             '_': str(int(time.time() * 1000))
         }
         response = self.session.get(
-            'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkkc/xxxkOper',
+            'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd'
+            '/xsxkkc/xxxkOper',
             params=params)
         if "错误" in response.text:
             response = self.session.get(
-                'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkkc/ggxxkxkOper',
+                'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b'
+                '/jsxsd/xsxkkc/ggxxkxkOper',
                 params=params)
         logger.info("选课结果:" + response.json()["message"])
 
@@ -483,7 +502,8 @@ class ChooseCourseHelper:
             '_': str(int(time.time() * 1000)),
         }
         response = self.session.get(
-            'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd/xsxkjg/xstkOper',
+            'https://webvpn.bupt.edu.cn/https/77726476706e69737468656265737421fae0469069327d406a468ca88d1b203b/jsxsd'
+            '/xsxkjg/xstkOper',
             params=params)
         logger.info("退课结果:" + response.json()["success"])
 

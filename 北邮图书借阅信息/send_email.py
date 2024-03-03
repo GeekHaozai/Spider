@@ -48,7 +48,6 @@ def send_mail(email_title,book_info):
     server.set_debuglevel(0)
     server.login(from_addr, password)
     server.sendmail(from_addr, areceiver.split(",") + acc, msg.as_string())
-    print("邮件已成功发出")
     server.quit()
 
 if __name__ == '__main__':

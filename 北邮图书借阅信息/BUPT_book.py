@@ -1,5 +1,6 @@
 import requests
 from 案例.北邮抢课.bupt import LoginHelper, LibraryInfoHandler
+import loguru
 session = requests.session()
 session.headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.67'
@@ -17,5 +18,6 @@ while True:
     try:
         sendbook()
         break
-    except:
+    except Exception as e:
+        loguru.logger.error(e)
         continue
