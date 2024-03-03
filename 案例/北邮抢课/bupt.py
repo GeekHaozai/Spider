@@ -431,8 +431,8 @@ if __name__ == '__main__':
     lh.vpn_login(2022212288, "WenHao0425")
     lh.edu_login("2022212288", "20040425")
     ig.get_in_xuanke()
-    # ig.get_xuanxiu()
-    # ig.get_public_course()
+    ig.get_xuanxiu()
+    ig.get_public_course()
     while True:
         try:
             kcid = input("请输入需要选课的kcid:")

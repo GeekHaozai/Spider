@@ -51,11 +51,19 @@ session.headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.67'
 }
 # 首先登录vpn
-lh = LoginHelper(session)
-lh.vpn_login(2022212288, "WenHao0425")
-lh.menghu_login(username="2022212288", password="WenHao0425*.*")
-books = lh.get_book_info()
-send_mail(books)
+def sendbook():
+    lh = LoginHelper(session)
+    lh.vpn_login(2022212288, "WenHao0425")
+    lh.menghu_login(username="2022212288", password="WenHao0425*.*")
+    books = lh.get_book_info()
+    send_mail(books)
+
+while True:
+    try:
+        sendbook()
+        break
+    except:
+        continue
 
 def btn_down():
     session.get("https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b/beiyou.html")
