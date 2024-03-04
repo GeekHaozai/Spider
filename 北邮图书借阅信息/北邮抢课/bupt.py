@@ -7,7 +7,6 @@ import requests
 import re
 import send_email
 import datetime
-import smtplib
 
 
 class LoginHelper:

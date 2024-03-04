@@ -1,5 +1,5 @@
 import requests
-from 案例.北邮抢课.bupt import LoginHelper, LibraryInfoHandler
+from 北邮抢课.bupt import LoginHelper, LibraryInfoHandler
 import loguru
 session = requests.session()
 session.headers = {
