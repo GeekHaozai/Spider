@@ -507,6 +507,10 @@ class ChooseCourseHelper:
         logger.info("退课结果:" + response.json()["success"])
 
 
+class YunYouEdu():
+    def __init__(self):
+        self.session = requests.Session()
+
 if __name__ == '__main__':
     # session = httpx.Client(trust_env=True)
     session = requests.Session()

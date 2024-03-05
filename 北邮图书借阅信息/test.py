@@ -1,9 +1,16 @@
-import requests
+class Animal:
+    def __init__(self,name,age):
+        self.name = name
+        self.age = age
 
-def rss(session:requests.Session):
-    session.headers['User-Agent'] = 'Mozilla/5.0 (Windows'
-    pass
+    def call(self,word):
+        print(word)
 
-session = requests.Session()
-rss(session)
-print(session.headers)
+class Dog(Animal):
+    def __init__(self,name,age,sex):
+        super(Dog,self).__init__(name,age)
+        self.sex = sex
+
+dog = Dog("dog",24,"nan")
+dog.call("nm")
+Dog.call(dog,12)

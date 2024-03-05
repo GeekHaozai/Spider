@@ -1,3 +1,5 @@
+import time
+
 import requests
 from 北邮抢课.bupt import LoginHelper, LibraryInfoHandler
 import loguru
@@ -20,4 +22,5 @@ while True:
         break
     except Exception as e:
         loguru.logger.error(e)
+        time.sleep(10)
         continue
