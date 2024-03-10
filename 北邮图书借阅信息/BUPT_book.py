@@ -22,5 +22,5 @@ while True:
         break
     except Exception as e:
         loguru.logger.error(e)
-        time.sleep(10)
+        time.sleep(100)
         continue
