@@ -20,6 +20,7 @@ def sendbook():
 while True:
     try:
         sendbook()
+        break
     except Exception as e:
         loguru.logger.error(e)
         loguru.logger.error(traceback.format_exc())
