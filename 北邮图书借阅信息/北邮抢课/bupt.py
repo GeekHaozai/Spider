@@ -277,11 +277,24 @@ class LibraryInfoHandler:
         book_url = ("https://webvpn.bupt.edu.cn/http-8080"
                     "/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b//reader-borrowinfo.json?vpn-12"
                     "-o1-opac.bupt.edu.cn:8080")
-        books = self.session.post(book_url, headers={
+        data = {
+            "pageNo": 1,
+            "pageSize": 10
+        }
+        books = self.session.post(book_url, data=data, headers={
             "Referer": "https://webvpn.bupt.edu.cn/http-8080"
                        "/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b/reader-borrowinfo.html"})
-        # print(books.text)
-        return books.json()
+        total_page = books.json()["totalPage"]
+        book_infos = books.json()
+        for i in range(2, total_page + 1):
+            resp = self.session.post(book_url, data={
+                "pageNo": i,
+                "pageSize": 10
+            }, headers={
+                "Referer": "https://webvpn.bupt.edu.cn/http-8080"
+                           "/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b/reader-borrowinfo.html"})
+            book_infos['data'] += resp.json()["data"]
+        return book_infos
 
     def renew(self, libraryId, bookBarcode, departmentId):
         xujie_url = ("https://webvpn.bupt.edu.cn/http-8080"
@@ -510,6 +523,7 @@ class ChooseCourseHelper:
 class YunYouEdu():
     def __init__(self):
         self.session = requests.Session()
+
 
 if __name__ == '__main__':
     # session = httpx.Client(trust_env=True)

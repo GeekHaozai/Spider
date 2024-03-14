@@ -56,5 +56,5 @@ def download_pic():
 
 if __name__ == '__main__':
     # download_pic()
-    for i in range(1,1000000):
-        print(i,"/1000000",end="\r")
+    for i in range(1,10):
+        print(i)
