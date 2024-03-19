@@ -366,6 +366,82 @@ class LibraryInfoHandler:
         send_email.send_mail(email_title, "\n".join(book_info).strip())
         logger.success("邮件已成功发出")
 
+    def get_new_book_info(self, *books_name):
+        url = "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b/search-full-result.json?vpn-12-o1-opac.bupt.edu.cn:8080"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
+            "Referer": "https://webvpn.bupt.edu.cn/http-8080/77726476706e69737468656265737421ffe7409f69327d406a468ca88d1b203b/search-full-result.html"
+        }
+        for book_name in books_name:
+            logger.info(f"查询{book_name}中")
+            num = 1
+            data = {
+                "xiaoqu": "all",
+                "keyword": book_name,
+                "solrType": "TITLE",
+                "pageNo": num,
+                "pageSize": "10",
+                "classSearch": "0",
+                "word_publisher_facet": "",
+                "type_publisher_facet": "",
+                "word_subject_facet": "",
+                "type_subject_facet": "",
+                "word_classno_facet": "",
+                "type_classno_facet": "",
+                "word_material_facet": "",
+                "type_material_facet": "",
+                "limit_publisher_facet": "",
+                "limit_subject_facet": "",
+                "limit_classno_facet": "",
+                "limit_material_facet": "",
+                "searchPrecision": ""
+            }
+            book_num = 0
+
+            resp = self.session.post(url, data=data,headers=headers)
+            total_page = resp.json()["totalPage"]
+            infos = ""
+            for book in resp.json()["data"]:
+                book_num = book_num + 1
+                authors = book["authors"]
+                title = re.search("<b>(.*?)</b>", book["title"]).group(1) if "<b>" in book["title"] else book["title"]
+                publisher = book["publisher"]
+                isn = book['isn']
+                pubdateDate = book['pubdateDate']
+                infos += f"{book_num}.{title}\n作者:{authors}\n出版社:{publisher}\nISBN:{isn}\n出版年份:{pubdateDate}\n"
+            for page in range(2,total_page+1):
+                resp = self.session.post(url, data={
+                "xiaoqu": "all",
+                "keyword": book_name,
+                "solrType": "TITLE",
+                "pageNo": page,
+                "pageSize": "10",
+                "classSearch": "0",
+                "word_publisher_facet": "",
+                "type_publisher_facet": "",
+                "word_subject_facet": "",
+                "type_subject_facet": "",
+                "word_classno_facet": "",
+                "type_classno_facet": "",
+                "word_material_facet": "",
+                "type_material_facet": "",
+                "limit_publisher_facet": "",
+                "limit_subject_facet": "",
+                "limit_classno_facet": "",
+                "limit_material_facet": "",
+                "searchPrecision": ""
+            },headers=headers)
+                for book in resp.json()["data"]:
+                    book_num = book_num + 1
+                    authors = book["authors"]
+                    title = re.search("<b>(.*?)</b>", book["title"]).group(1) if "<b>" in book["title"] else book["title"]
+                    publisher = book["publisher"]
+                    isn = book['isn']
+                    pubdateDate = book['pubdateDate']
+                    infos += f"{book_num}.{title}\n作者:{authors}\n出版社:{publisher}\nISBN:{isn}\n出版年份:{pubdateDate}\n"
+            print(infos)
+            send_email.send_mail(f"查询{book_name}的结果",infos.strip())
+        return True
 
 # 进入选课页面获取信息
 class CourseInfoGetter:
@@ -527,6 +603,7 @@ class YunYouEdu():
 
 if __name__ == '__main__':
     # session = httpx.Client(trust_env=True)
+
     session = requests.Session()
     lh = LoginHelper(session=session)
     ig = CourseInfoGetter(session=session)
